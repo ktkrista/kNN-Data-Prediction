@@ -1,5 +1,4 @@
 ---
-title: "Section 2: R Code"
 Author: "Krista Chanaritthichai"
 output: pdf_document
 ---
@@ -105,22 +104,5 @@ Plot the training data and shows the decision boundary for the optimal K.
 plot(train.X, col = ifelse(train.Y == "yes", "green", "red"))
 contour(x1.grid, x2.grid, prob, levels = 0.5, labels = "", xlab = "", ylab = "", main = "", add = T)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
