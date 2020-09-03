@@ -1,0 +1,126 @@
+---
+title: "Section 2: R Code"
+Author: "Krista Chanaritthichai"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T,
+                      results = "hide")
+```
+
+Read in the data
+```{r, message=FALSE}
+trainningData <- read.csv("/Users/kristach/desktop/1-training_data.csv")
+testData <- read.csv("/Users/kristach/desktop/1-test_data.csv")
+```
+
+Extract training set 
+```{r, message=FALSE}
+train.X <- trainningData[ , c("x.1","x.2")]
+train.Y <- trainningData[ ,c("y")]
+dim(train.X)
+head(train.X)
+head(train.Y)
+table(train.Y)
+```
+
+Plot the tranning data 
+```{r, fig.show='hide'}
+plot(train.X, xlab = "x.1", ylab = "x.2", col = ifelse(train.Y ==	"yes", "green", "red"))
+```
+
+Extract testing set
+```{r, message=FALSE}
+attach(testData)
+test.X <- testData [ , c("x.1", "x.2")]
+test.Y <- testData [ , c("y")]
+dim(test.X)
+head(test.X)
+head(test.Y)
+table(test.Y)
+```
+
+A library for kNN algorithm 
+```{r, message=FALSE}
+library(class)
+```
+
+Fit KNN with k = 1,2,...,100 
+```{r, message=FALSE}
+ks <- c(seq(1, 30, by = 1), seq(32, 100, by = 2 ))
+nks <- length(ks)
+err.rate.train <- numeric(length = nks)
+err.rate.test <- numeric(length = nks)
+names(err.rate.train) <- names(err.rate.test) <- ks
+
+for (i in seq(along = ks)) {
+  set.seed(1)
+  mod.train <- knn(train.X, train.X, train.Y, k = ks[i])
+  set.seed(1)
+  mod.test <- knn(train.X, test.X, train.Y, k = ks[i])
+  err.rate.train[i] <- mean(mod.train != train.Y)
+  err.rate.test[i] <- mean(mod.test != test.Y)
+}
+```
+
+
+Plot training and test error rates against K
+
+```{r, fig.show='hide'}
+plot(ks, err.rate.train, xlab = "Number of nearest neighbors", 
+     ylab = "Error rate", type = "b",
+     ylim = range(c(err.rate.train, err.rate.test)),
+     col = "blue", pch = 20)
+lines(ks, err.rate.test, type="b", col="purple", pch = 20)
+legend("bottomright", lty = 1, col = c("blue", "purple"), legend = c("training", "test"))
+```
+
+
+Compute the optimal value of K, training error rates, and test error rates associated with the optimal K
+
+```{r, message=FALSE}
+result <- data.frame(ks, err.rate.train, err.rate.test)
+result[err.rate.test == min(result$err.rate.test), ]
+```
+
+Decision boundary for optimal K
+
+```{r, message=FALSE}
+n.grid <- 50
+x1.grid <- seq(f = min(train.X[, 1]), t = max(train.X[, 1]), l = n.grid)
+x2.grid <- seq(f = min(train.X[, 2]), t = max(train.X[, 2]), l = n.grid)
+grid <- expand.grid(x1.grid, x2.grid)
+
+k.opt <- 26
+set.seed(1)
+mod.opt <- knn(train.X, grid, train.Y, k = k.opt, prob = T)
+prob <- attr(mod.opt, "prob") # prob is voting fraction for winning class
+prob <- ifelse(mod.opt == "yes", prob, 1 - prob) # now it is voting fraction for "yes"
+prob <- matrix(prob, n.grid, n.grid)
+```
+
+Plot the training data and shows the decision boundary for the optimal K.
+```{r, fig.show='hide'}
+plot(train.X, col = ifelse(train.Y == "yes", "green", "red"))
+contour(x1.grid, x2.grid, prob, levels = 0.5, labels = "", xlab = "", ylab = "", main = "", add = T)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
